@@ -43,16 +43,13 @@ async def main():
         if client.is_connected():
             await client.disconnect()
             print("Telegram client disconnected.")
-        
+
         if conn:
             conn.close()
             print("Database connection closed.")
-        
+
         print("Application has exited gracefully.")
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        pass
+    asyncio.run(main())

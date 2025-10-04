@@ -15,9 +15,7 @@ PROXY_HOST = os.getenv("PROXY_HOST", "127.0.0.1")
 PROXY_PORT = int(os.getenv("PROXY_PORT", 1080))
 PROXY_RDNS = os.getenv("PROXY_RDNS", "False").lower() == "true"
 
-proxy = None
-if PROXY_ENABLED:
-    proxy = (PROXY_TYPE, PROXY_HOST, PROXY_PORT, PROXY_RDNS)
+proxy = (PROXY_TYPE, PROXY_HOST, PROXY_PORT, PROXY_RDNS) if PROXY_ENABLED else None
 
 
 async def list_chats():

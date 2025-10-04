@@ -19,10 +19,8 @@ def get_sticker_emoji(msg):
 
 async def process_message(msg, conn, save_message, save_or_update_user):
     sender = await msg.get_sender()
-
     if sender and isinstance(sender, User):
         save_or_update_user(conn, sender.id, sender.first_name, sender.last_name, sender.username)
-
     if msg.text:
         save_message(conn, msg.id, msg.chat_id, msg.sender_id, msg.date, msg.text, "text")
     elif msg.sticker or (msg.document and any(isinstance(attr, DocumentAttributeSticker) for attr in msg.document.attributes)):
