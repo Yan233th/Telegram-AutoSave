@@ -26,43 +26,33 @@ async def main():
     client = TelegramClient(SESSION_NAME, API_ID, API_HASH, proxy=proxy)
 
     try:
-        # <<< 1. 主要邏輯放入 try 區塊 >>>
         await client.start()
 
-        # 歷史補全
         await fetch_history(client, conn, TARGET_CHAT, save_message, save_or_update_user)
-        print("歷史消息同步完成")
+        print("Historical messages synchronization complete.")
 
-        # 實時監聽
         register_handlers(client, conn, TARGET_CHAT, save_message, save_or_update_user)
-        print("開始監聽新消息... (按 Ctrl+C 退出)")
+        print("Listening for new messages... (Press Ctrl+C to exit)")
         await client.run_until_disconnected()
 
     except KeyboardInterrupt:
-        # <<< 2. 捕捉到 Ctrl+C 時，打印提示訊息 >>>
-        # 這個區塊可以為空，因為主要清理工作在 finally 中完成
-        print("\n檢測到退出指令，正在關閉程式...")
+        print("\nExit command detected, shutting down the application...")
 
     finally:
-        # <<< 3. 無論如何都會執行的清理區塊 >>>
-        # 確保客戶端和資料庫連線都被安全關閉
-        print("正在清理資源...")
+        print("Cleaning up resources...")
         if client.is_connected():
             await client.disconnect()
-            print("Telegram 客戶端已斷開連接。")
+            print("Telegram client disconnected.")
         
         if conn:
             conn.close()
-            print("資料庫連線已關閉。")
+            print("Database connection closed.")
         
-        print("程式已安全退出。")
+        print("Application has exited gracefully.")
 
 
 if __name__ == "__main__":
-    # 在 Python 3.11+ 中，可以使用 asyncio.run 的 shutdown_asyncgens=True 來幫助清理
-    # 但這裡的 try/finally 結構更為通用和明確
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        # 為了處理在 asyncio.run 啟動前就按 Ctrl+C 的極端情況
         pass

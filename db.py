@@ -4,7 +4,6 @@ import sqlite3
 def init_db():
     conn = sqlite3.connect("messages.db")
     cursor = conn.cursor()
-    # 創建 messages 表
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY,
@@ -15,7 +14,6 @@ def init_db():
         type TEXT
     )
     """)
-    # 新增：創建 users 表
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
@@ -37,11 +35,9 @@ def save_message(conn, msg_id, chat_id, sender_id, date, text, mtype):
     conn.commit()
 
 
-# 新增：儲存或更新使用者的函數
 def save_or_update_user(conn, user_id, first_name, last_name, username):
     cursor = conn.cursor()
-    # 當 user_id 衝突時（即使用者已存在），則更新其名稱和使用者名稱
-    # 這是處理使用者改名情況的關鍵
+    # When user_id conflicts (i.e., user already exists), update their name and username
     cursor.execute(
         """
         INSERT INTO users (id, first_name, last_name, username) 
