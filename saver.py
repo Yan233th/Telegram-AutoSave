@@ -1,5 +1,5 @@
 from telethon import events
-from telethon.tl.types import Message, User, DocumentAttributeSticker, MessageMediaDocument
+from telethon.tl.types import User, DocumentAttributeSticker, MessageMediaDocument
 
 
 def get_sticker_emoji(msg):
@@ -18,20 +18,25 @@ def get_sticker_emoji(msg):
 
 
 async def process_message(msg, conn, save_message, save_or_update_user):
-    sender = await msg.get_sender()
-    if sender and isinstance(sender, User):
-        save_or_update_user(conn, sender.id, sender.first_name, sender.last_name, sender.username)
+    # Check if sender_id exists, as system messages may not have one.
+    if msg.sender_id:
+        sender = await msg.get_sender()
+        if sender and isinstance(sender, User):
+            save_or_update_user(conn, sender.id, sender.first_name, sender.last_name, sender.username)
+
     if msg.text:
         save_message(conn, msg.id, msg.chat_id, msg.sender_id, msg.date, msg.text, "text")
     elif msg.sticker or (msg.document and any(isinstance(attr, DocumentAttributeSticker) for attr in msg.document.attributes)):
         emoji = get_sticker_emoji(msg)
         save_message(conn, msg.id, msg.chat_id, msg.sender_id, msg.date, emoji, "sticker")
+    else:
+        # Handle other types, including system messages (MessageService).
+        # Save the string representation of the message object for inspection.
+        save_message(conn, msg.id, msg.chat_id, msg.sender_id, msg.date, str(msg), "other")
 
 
 async def fetch_history(client, conn, target_chat, save_message, save_or_update_user):
     async for msg in client.iter_messages(target_chat, reverse=True):
-        if not isinstance(msg, Message):
-            continue  # Skip system messages
         await process_message(msg, conn, save_message, save_or_update_user)
 
 
@@ -39,6 +44,4 @@ def register_handlers(client, conn, target_chat, save_message, save_or_update_us
     @client.on(events.NewMessage(chats=target_chat))
     async def handler(event):
         msg = event.message
-        if not isinstance(msg, Message):
-            return  # Skip system messages
         await process_message(msg, conn, save_message, save_or_update_user)
