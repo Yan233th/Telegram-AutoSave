@@ -10,7 +10,7 @@ load_dotenv()
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 SESSION_NAME = os.getenv("SESSION_NAME")
-TARGET_CHAT = os.getenv("TARGET_CHAT")
+TARGET_CHAT = int(os.getenv("TARGET_CHAT"))
 
 PROXY_ENABLED = os.getenv("PROXY_ENABLED", "False").lower() in ("1", "true", "yes")
 PROXY_TYPE = os.getenv("PROXY_TYPE", "socks5")
@@ -19,6 +19,7 @@ PROXY_PORT = int(os.getenv("PROXY_PORT", 1080))
 PROXY_RDNS = os.getenv("PROXY_RDNS", "True").lower() in ("1", "true", "yes")
 
 proxy = (PROXY_TYPE, PROXY_HOST, PROXY_PORT, PROXY_RDNS) if PROXY_ENABLED else None
+
 
 async def main():
     conn = init_db()
@@ -33,6 +34,7 @@ async def main():
     register_handlers(client, conn, TARGET_CHAT, save_message)
     print("开始监听新消息...")
     await client.run_until_disconnected()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
