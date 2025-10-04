@@ -2,7 +2,11 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from telethon import TelegramClient
-from db import init_db, save_message
+
+# 匯入所有需要的 db 函數
+from db import init_db, save_message, save_or_update_user
+
+# 匯入 saver 函數
 from saver import register_handlers, fetch_history
 
 load_dotenv()
@@ -26,13 +30,13 @@ async def main():
     client = TelegramClient(SESSION_NAME, API_ID, API_HASH, proxy=proxy)
     await client.start()
 
-    # 历史补全
-    await fetch_history(client, conn, TARGET_CHAT, save_message)
-    print("历史消息同步完成")
+    # 歷史補全，傳入新的 save_or_update_user 函數
+    await fetch_history(client, conn, TARGET_CHAT, save_message, save_or_update_user)
+    print("歷史消息同步完成")
 
-    # 实时监听
-    register_handlers(client, conn, TARGET_CHAT, save_message)
-    print("开始监听新消息...")
+    # 實時監聽，傳入新的 save_or_update_user 函數
+    register_handlers(client, conn, TARGET_CHAT, save_message, save_or_update_user)
+    print("開始監聽新消息...")
     await client.run_until_disconnected()
 
 
