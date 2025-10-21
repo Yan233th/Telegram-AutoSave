@@ -1,4 +1,6 @@
+from asyncio import sleep
 from telethon import events
+from telethon.errors import FloodWaitError
 from telethon.tl.types import User, DocumentAttributeSticker, MessageMediaDocument
 
 
@@ -36,8 +38,19 @@ async def process_message(msg, conn, save_message, save_or_update_user):
 
 
 async def fetch_history(client, conn, target_chat, save_message, save_or_update_user):
-    async for msg in client.iter_messages(target_chat, reverse=True):
-        await process_message(msg, conn, save_message, save_or_update_user)
+    while True:
+        try:
+            async for msg in client.iter_messages(target_chat, reverse=True):
+                await process_message(msg, conn, save_message, save_or_update_user)
+            break
+
+        except FloodWaitError as e:
+            print(f"Server requests are too frequent. Please wait {e.seconds} seconds...")
+            await sleep(e.seconds)
+
+        except Exception as e:
+            print(f"Unknown error occurred while fetching history: {e}, retrying in 10 seconds...")
+            await sleep(10)
 
 
 def register_handlers(client, conn, target_chat, save_message, save_or_update_user):
